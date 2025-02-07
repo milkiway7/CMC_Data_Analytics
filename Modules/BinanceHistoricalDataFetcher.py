@@ -1,16 +1,23 @@
 import aiohttp
 import asyncio
 import time
+from Database.save_to_db import save_candles_to_db
+from datetime import datetime, timedelta, timezone
 
 CANDLES_API_URL = "https://api.binance.com/api/v3/klines"
 SYMBOLS = ["BTCUSDT","ETHUSDT","XRPUSDT","SOLUSDT"]
 INTERVALS = ["1m", "5m", "15m", "1h"]
 LIMIT = 1000
 
-# Funkcja asynchroniczna do pobierania świec (klines)
+def get_date_seven_years_ago_ms():
+    date_seven_years_ago = datetime.now(timezone.utc) - timedelta(days=5*365)
+    date_miliseconds = int(date_seven_years_ago.timestamp() * 1000)
+    return date_miliseconds
+
+HISTORICAL_DATA_END_DATE = get_date_seven_years_ago_ms()
+
 async def fetch_historical_candles(symbol, interval):
     end_time = int(time.time() * 1000)  # Aktualny czas w milisekundach
-    all_data = []
 
     async with aiohttp.ClientSession() as session:
         while True:
@@ -37,12 +44,12 @@ async def fetch_historical_candles(symbol, interval):
                         "low": candle[3],
                         "close": candle[4],
                         "volume": candle[5],
-                        "end_time": candle[6],
+                        "close_time": candle[6],
                     }
                     for candle in data
                 ]
-
-                all_data.extend(candles)
+                # Zapisanie świec do bazy danych w partiach po 1000
+                await save_candles_to_db(candles)
 
                 # Sprawdzenie, czy pobraliśmy mniej niż limit (koniec danych)
                 if len(data) < LIMIT:
@@ -52,12 +59,11 @@ async def fetch_historical_candles(symbol, interval):
                 # Ustaw nowy endTime jako najstarszy czas - 1ms (żeby uniknąć duplikatów)
                 end_time = data[0][0] - 1
 
-    return all_data
+                if end_time < HISTORICAL_DATA_END_DATE:
+                    print(f"Osiągnięto maksymalną datę historii dla {symbol} {interval}")
+                    break
 
-# Funkcja do iterowania po wszystkich symbolach i interwałach
 async def fetch_all_data():
     tasks = [fetch_historical_candles(symbol, interval) for symbol in SYMBOLS for interval in INTERVALS]
-    results = await asyncio.gather(*tasks)
+    await asyncio.gather(*tasks)
     
-    # Flatten list of lists (ponieważ gather zwraca listę list)
-    return [item for sublist in results for item in sublist]

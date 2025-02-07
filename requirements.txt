@@ -5,3 +5,4 @@ aiohttp==2.4.4
 asyncio==3.4.3
 SQLAlchemy==2.0.37
 pyodbc==5.2.0
+aioodbc==22.3.1

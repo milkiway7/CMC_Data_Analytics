@@ -2,19 +2,14 @@ import aiohttp
 import asyncio
 import time
 from Database.save_to_db import save_candles_to_db
-from datetime import datetime, timedelta, timezone
-from Modules.TechnicalAnalysisCalculate import calculate_sma_ema
+from Helpers.date import get_date_days_ago_ms
+
 CANDLES_API_URL = "https://api.binance.com/api/v3/klines"
 SYMBOLS = ["BTCUSDT","ETHUSDT","XRPUSDT","SOLUSDT"]
 INTERVALS = ["1m", "5m", "15m", "1h"]
 LIMIT = 1000
 
-def get_date_ago_ms():
-    date_seven_years_ago = datetime.now(timezone.utc) - timedelta(days=365*5)
-    date_miliseconds = int(date_seven_years_ago.timestamp() * 1000)
-    return date_miliseconds
-
-HISTORICAL_DATA_END_DATE = get_date_ago_ms()
+HISTORICAL_DATA_END_DATE = get_date_days_ago_ms(365,5)
 
 async def fetch_historical_candles(symbol, interval):
     end_time = int(time.time() * 1000)  # Aktualny czas w milisekundach

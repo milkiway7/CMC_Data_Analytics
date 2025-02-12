@@ -8,7 +8,6 @@ class SmaEmaTechnicalIndicatorsTable(Base):
     
     Id = Column(Integer, primary_key=True, autoincrement=True)
     Symbol = Column(String(10), nullable=False)
-    Interval = Column(String(10), nullable=False)
     CloseTime = Column(BigInteger, nullable=False)
     Sma5 = Column(Numeric(18,8), nullable=False)
     Sma10 = Column(Numeric(18,8), nullable=False)

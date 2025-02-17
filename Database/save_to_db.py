@@ -1,6 +1,6 @@
 from Database.database import Database
 from Database.TableModels.CandlesHistoricalData import CandlesHistoricalData
-from Database.TableModels.SmaEmaTechnicalIndicatorsTable import SmaEmaTechnicalIndicatorsTable
+from Database.TableModels.TechnicalIndicatorsTable import TechnicalIndicatorsTable
 
 db = Database()
 
@@ -31,7 +31,9 @@ async def save_technical_analysis_to_db(technical_analysis_data):
     async with db.get_session() as session:
         try:
             for symbol in technical_analysis_data:
-                record = SmaEmaTechnicalIndicatorsTable(Symbol=symbol)
+                record = TechnicalIndicatorsTable(
+                    Symbol=symbol, 
+                    Rsi = float(technical_analysis_data[symbol]["RSI"]))
                 
                 for sma in technical_analysis_data[symbol]["SMA"]:
                     

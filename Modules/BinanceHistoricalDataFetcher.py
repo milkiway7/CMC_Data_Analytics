@@ -6,7 +6,7 @@ from Helpers.date import get_date_days_ago_ms
 
 CANDLES_API_URL = "https://api.binance.com/api/v3/klines"
 SYMBOLS = ["BTCUSDT","ETHUSDT","XRPUSDT","SOLUSDT"]
-INTERVALS = ["1m", "5m", "15m", "1h"]
+INTERVALS = ["1m", "5m", "15m", "1h","1d"]
 LIMIT = 1000
 
 HISTORICAL_DATA_END_DATE = get_date_days_ago_ms(365,5)

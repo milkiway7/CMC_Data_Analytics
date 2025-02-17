@@ -50,8 +50,8 @@ CONSTANTS = {
             "interval": "15m",
         },
         {
-            "name": "Ema50",
-            "period": 50,
+            "name": "Ema26",
+            "period": 26,
             "interval": "1h"
         },
         {
@@ -64,5 +64,9 @@ CONSTANTS = {
             "period": 200,
             "interval": "1h"
         }
-    ]
+    ],
+    "RSI":{
+        "period": 14,
+        "interval": "1d"
+    }
 }

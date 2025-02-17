@@ -1,9 +1,11 @@
 from Database.database import Database
 from Database.TableModels.CandlesHistoricalData import CandlesHistoricalData
-from Database.TableModels.TechnicalIndicatorsTable import TechnicalIndicatorsTable
+from Database.TableModels.TechnicalIndicatorsTables import TechnicalIndicatorsHourly, TechnicalIndicatorsFourHours, TechnicalIndicatorsDaily
 async def initialize_database():
     db = Database()
     async with db.engine.begin() as conn:  # Używamy asynchronicznego połączenia
         await conn.run_sync(CandlesHistoricalData.metadata.create_all)
-        await conn.run_sync(TechnicalIndicatorsTable.metadata.create_all)
+        await conn.run_sync(TechnicalIndicatorsHourly.metadata.create_all)
+        await conn.run_sync(TechnicalIndicatorsFourHours.metadata.create_all)
+        await conn.run_sync(TechnicalIndicatorsDaily.metadata.create_all)
     print("Database initialized")

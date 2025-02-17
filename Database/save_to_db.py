@@ -1,6 +1,6 @@
 from Database.database import Database
 from Database.TableModels.CandlesHistoricalData import CandlesHistoricalData
-from Database.TableModels.TechnicalIndicatorsTable import TechnicalIndicatorsTable
+from Database.TableModels.TechnicalIndicatorsTables import TechnicalIndicatorsHourly
 
 db = Database()
 
@@ -27,13 +27,11 @@ async def save_candles_to_db(candles_data):
             await session.rollback()
             print(f"Błąd zapisu do bazy: {e}")
             
-async def save_technical_analysis_to_db(technical_analysis_data):
+async def save_technical_analysis_hourly(technical_analysis_data):
     async with db.get_session() as session:
         try:
             for symbol in technical_analysis_data:
-                record = TechnicalIndicatorsTable(
-                    Symbol=symbol, 
-                    Rsi = float(technical_analysis_data[symbol]["RSI"]))
+                record = TechnicalIndicatorsHourly(Symbol=symbol)
                 
                 for sma in technical_analysis_data[symbol]["SMA"]:
                     

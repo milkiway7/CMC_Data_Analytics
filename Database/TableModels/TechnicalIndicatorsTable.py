@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
-class SmaEmaTechnicalIndicatorsTable(Base):
+class TechnicalIndicatorsTable(Base):
     __tablename__ = "SmaEmaTechnicalIndicators"
     
     Id = Column(Integer, primary_key=True, autoincrement=True)
@@ -18,6 +18,7 @@ class SmaEmaTechnicalIndicatorsTable(Base):
     Ema5 = Column(Numeric(18,8), nullable=False)
     Ema9 = Column(Numeric(18,8), nullable=False)
     Ema12 = Column(Numeric(18,8), nullable=False)
-    Ema50 = Column(Numeric(18,8), nullable=False)
+    Ema26 = Column(Numeric(18,8), nullable=False)
     Ema100 = Column(Numeric(18,8), nullable=False)
     Ema200 = Column(Numeric(18,8), nullable=False)
+    Rsi = Column(Numeric(18,2), nullable=False)

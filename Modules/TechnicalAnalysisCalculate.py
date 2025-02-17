@@ -1,11 +1,16 @@
+from decimal import ROUND_HALF_UP, Decimal
 import pandas as pd
 from Database.get_from_db import get_filtered_candles
 from Helpers.date import get_date_days_ago_ms
 import constants
 import asyncio
 from Database.save_to_db import save_technical_analysis_to_db
+import numpy as np
+
 TECHNICAL_ANALYSIS_INDICATORS = {
     "BTC":{
+        "RSI":None,
+        "MACD": None,
         "SMA":{
                 "Sma5" : {
                     "close_time": None,
@@ -45,7 +50,7 @@ TECHNICAL_ANALYSIS_INDICATORS = {
                     "close_time": None,
                     "value": None
                 },                
-                "Ema50" : {
+                "Ema26" : {
                     "close_time": None,
                     "value": None
                 },                
@@ -60,6 +65,8 @@ TECHNICAL_ANALYSIS_INDICATORS = {
             },
         },
     "ETH":{
+        "RSI":None,
+        "MACD": None,
         "SMA":{
                 "Sma5" : {
                     "close_time": None,
@@ -99,7 +106,7 @@ TECHNICAL_ANALYSIS_INDICATORS = {
                     "close_time": None,
                     "value": None
                 },                
-                "Ema50" : {
+                "Ema26" : {
                     "close_time": None,
                     "value": None
                 },                
@@ -114,6 +121,8 @@ TECHNICAL_ANALYSIS_INDICATORS = {
             },
         },
     "SOL":{
+        "RSI":None,
+        "MACD": None,
         "SMA":{
                 "Sma5" : {
                     "close_time": None,
@@ -153,7 +162,7 @@ TECHNICAL_ANALYSIS_INDICATORS = {
                     "close_time": None,
                     "value": None
                 },                
-                "Ema50" : {
+                "Ema26" : {
                     "close_time": None,
                     "value": None
                 },                
@@ -168,6 +177,8 @@ TECHNICAL_ANALYSIS_INDICATORS = {
             },
         },
     "XRP":{
+        "RSI":None,
+        "MACD": None,
         "SMA":{
                 "Sma5" : {
                     "close_time": None,
@@ -207,7 +218,7 @@ TECHNICAL_ANALYSIS_INDICATORS = {
                     "close_time": None,
                     "value": None
                 },                
-                "Ema50" : {
+                "Ema26" : {
                     "close_time": None,
                     "value": None
                 },                
@@ -224,20 +235,13 @@ TECHNICAL_ANALYSIS_INDICATORS = {
 }
 
 async def calculate_all_technical_indicators():
-    tasks = [calculate_sma_ema()]
+    tasks = [calculate_sma_ema_macd(),calculate_rsi()]
     await asyncio.gather(*tasks)
     #save to db
-    for symbol in TECHNICAL_ANALYSIS_INDICATORS:
-        print(symbol)
-        for sma in TECHNICAL_ANALYSIS_INDICATORS[symbol]["SMA"]:
-            print(sma)
-            print(TECHNICAL_ANALYSIS_INDICATORS[symbol]["SMA"][sma]["value"])
-            print(TECHNICAL_ANALYSIS_INDICATORS[symbol]["SMA"][sma]["close_time"])
     await save_technical_analysis_to_db(TECHNICAL_ANALYSIS_INDICATORS)   
-    
- 
+
 #zrob dla jednego   
-async def calculate_sma_ema():
+async def calculate_sma_ema_macd():
     
     for currency in constants.CONSTANTS["currency"]:
         for sma_data in constants.CONSTANTS["SMA"]:
@@ -263,10 +267,41 @@ async def calculate_sma_ema():
                 
                 TECHNICAL_ANALYSIS_INDICATORS[currency]["EMA"][ema_data["name"]]["value"] = ema_value
                 TECHNICAL_ANALYSIS_INDICATORS[currency]["EMA"][ema_data["name"]]["close_time"] = df["close_time"].iloc[-1] 
+    
+        TECHNICAL_ANALYSIS_INDICATORS[currency]["MACD"] = TECHNICAL_ANALYSIS_INDICATORS[currency]["EMA"]["Ema12"]["value"] - TECHNICAL_ANALYSIS_INDICATORS[currency]["EMA"]["Ema26"]["value"]
 
+async def calculate_rsi():
+    
+    for currency in constants.CONSTANTS["currency"]:
+        data = await get_filtered_candles(currency,constants.CONSTANTS["RSI"]["interval"],get_date_days_ago_ms(constants.CONSTANTS["RSI"]["period"],1))
+        sorted_data = await sort_data_by_date(data)
+        close_prices = [entry['close'] for entry in sorted_data]
+        
+        if len(close_prices) > 14:
+            close_prices = close_prices[-14:]
+            
+        deltas = np.diff(close_prices)  # Różnice między kolejnymi dniami
+        gains = np.insert(np.where(deltas > 0, deltas, 0),0,0)  # Tylko wzrosty
+        losses = np.insert(np.where(deltas < 0, -deltas, 0),0,0)  # Tylko spadki (wartości dodatnie)
+        
+        avg_gain = np.mean(gains[:len(gains)])  # Tablica na średnie wzrosty
+        avg_loss =  np.mean(losses[:len(losses)])
+        
+        rs = None
+        rsi = None
+        
+        if avg_loss == 0:
+            rsi = 100 # avg_gain / avg_losss = 0 co znaczy że nie było spadków (maksymalnie wykupiony rynek)
+        else:
+            rs = avg_gain / avg_loss
+            rsi = 100 - (100 / (1 + rs))
+            rsi = rsi.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) 
+        
+        TECHNICAL_ANALYSIS_INDICATORS[currency]["RSI"] = rsi
+        
 async def sort_data_by_date(data):
     return sorted(data, key=lambda x: x["close_time"])
 
 
-    
+
 

@@ -4,7 +4,7 @@ from Database.get_from_db import get_filtered_candles
 from Helpers.date import get_date_days_ago_ms
 import constants
 import asyncio
-# from Database.save_to_db import save_technical_analysis_to_db
+from Database.save_to_db import save_technical_analysis_hourly,save_technical_analysis_four_hours,save_technical_analysis_daily
 import numpy as np
 
 TECHNICAL_ANALYSIS_INDICATORS_HOURLY = {
@@ -292,9 +292,10 @@ async def calculate_all_technical_indicators():
     if all(result):
         await calculate_macd()
     #save to db
-    # await save_technical_analysis_to_db(TECHNICAL_ANALYSIS_INDICATORS)   
-
-#zrob dla jednego   
+    await save_technical_analysis_hourly(TECHNICAL_ANALYSIS_INDICATORS_HOURLY)   
+    await save_technical_analysis_four_hours(TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS)   
+    await save_technical_analysis_daily(TECHNICAL_ANALYSIS_INDICATORS_DAILY)
+ 
 async def calculate_sma_ema(date_scope):
     
     for currency in constants.CONSTANTS["currency"]:
@@ -351,9 +352,10 @@ async def calculate_rsi():
             rs = avg_gain / avg_loss
             rsi = 100 - (100 / (1 + rs))
             rsi = rsi.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) 
-    
+        TECHNICAL_ANALYSIS_INDICATORS_DAILY[currency]["RSI"] = rsi
     return True
-        
+
+#oblicz raz na dzień  
 async def calculate_macd():
     for currency in constants.CONSTANTS["currency"]:
         TECHNICAL_ANALYSIS_INDICATORS_DAILY[currency]["MACD"] = TECHNICAL_ANALYSIS_INDICATORS_HOURLY[currency]["EMA"]["Ema12"]["value"] - TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS[currency]["EMA"]["Ema26"]["value"]

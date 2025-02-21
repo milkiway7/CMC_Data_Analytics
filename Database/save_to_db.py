@@ -5,27 +5,15 @@ from Database.TableModels.TechnicalIndicatorsTables import TechnicalIndicatorsHo
 db = Database()
 
 async def save_candles_to_db(candles_data):
-    async with db.get_session() as session:  # Używamy asynchronicznego kontekstu
-        try:
-            for candle in candles_data:
-                record = CandlesHistoricalData(
-                    Symbol=candle["symbol"],
-                    Interval=candle["interval"],
-                    OpenTime=candle["open_time"],
-                    Open=candle["open"],
-                    High=candle["high"],
-                    Low=candle["low"],
-                    Close=candle["close"],
-                    Volume=candle["volume"],
-                    CloseTime=candle["close_time"]
-                )
-                session.add(record)
-            
-            # Czekamy na zakończenie commit
-            await session.commit()  
-        except Exception as e:
-            await session.rollback()
-            print(f"Błąd zapisu do bazy: {e}")
+    try:
+        batch_size = 100  # Możesz dostosować rozmiar partii
+        async with db.get_session() as session:
+            for i in range(0, len(candles_data), batch_size):
+                batch = candles_data[i:i + batch_size]
+                session.add_all([CandlesHistoricalData(**candle) for candle in batch])
+                await session.commit()
+    except Exception as e:
+        print(f"Błąd zapisu do bazy: {e}")
             
 async def save_technical_analysis_hourly(technical_analysis_hourly):
     async with db.get_session() as session:

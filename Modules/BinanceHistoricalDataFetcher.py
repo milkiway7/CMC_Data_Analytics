@@ -31,15 +31,15 @@ async def fetch_historical_candles(symbol, interval):
                 # Przetwarzanie świec i dodanie symbolu oraz interwału
                 candles = [
                     {
-                        "symbol": symbol[:3],
-                        "interval": interval,
-                        "open_time": candle[0],
-                        "open": candle[1],
-                        "high": candle[2],
-                        "low": candle[3],
-                        "close": candle[4],
-                        "volume": candle[5],
-                        "close_time": candle[6],
+                        "Symbol": symbol[:3],
+                        "Interval": interval,
+                        "OpenTime": candle[0],
+                        "Open": candle[1],
+                        "High": candle[2],
+                        "Low": candle[3],
+                        "Close": candle[4],
+                        "Volume": candle[5],
+                        "CloseTime": candle[6]
                     }
                     for candle in data
                 ]

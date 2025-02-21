@@ -287,14 +287,14 @@ TECHNICAL_ANALYSIS_INDICATORS_DAILY = {
 }
 
 async def calculate_all_technical_indicators():
-    tasks = [calculate_sma_ema("technical_indicators_hourly"),calculate_sma_ema("technical_indicators_four_hours"),calculate_sma_ema("technical_indicators_daily"),calculate_rsi()]
+    tasks = [calculate_sma_ema("technical_indicators_hourly")]
     result = await asyncio.gather(*tasks)
-    if all(result):
-        await calculate_macd()
-    #save to db
-    await save_technical_analysis_hourly(TECHNICAL_ANALYSIS_INDICATORS_HOURLY)   
-    await save_technical_analysis_four_hours(TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS)   
-    await save_technical_analysis_daily(TECHNICAL_ANALYSIS_INDICATORS_DAILY)
+    # if all(result):
+    #     await calculate_macd()
+    # #save to db
+    # await save_technical_analysis_hourly(TECHNICAL_ANALYSIS_INDICATORS_HOURLY)   
+    # await save_technical_analysis_four_hours(TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS)   
+    # await save_technical_analysis_daily(TECHNICAL_ANALYSIS_INDICATORS_DAILY)
  
 async def calculate_sma_ema(date_scope):
     

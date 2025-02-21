@@ -287,14 +287,14 @@ TECHNICAL_ANALYSIS_INDICATORS_DAILY = {
 }
 
 async def calculate_all_technical_indicators():
-    tasks = [calculate_sma_ema("technical_indicators_hourly")]
+    tasks = [calculate_sma_ema("technical_indicators_hourly"),calculate_sma_ema("technical_indicators_four_hours"),calculate_sma_ema("technical_indicators_daily"),calculate_rsi()]
     result = await asyncio.gather(*tasks)
-    # if all(result):
-    #     await calculate_macd()
-    # #save to db
-    # await save_technical_analysis_hourly(TECHNICAL_ANALYSIS_INDICATORS_HOURLY)   
-    # await save_technical_analysis_four_hours(TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS)   
-    # await save_technical_analysis_daily(TECHNICAL_ANALYSIS_INDICATORS_DAILY)
+    if all(result):
+        await calculate_macd()
+    #save to db
+    await save_technical_analysis_hourly(TECHNICAL_ANALYSIS_INDICATORS_HOURLY)   
+    await save_technical_analysis_four_hours(TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS)   
+    await save_technical_analysis_daily(TECHNICAL_ANALYSIS_INDICATORS_DAILY)
  
 async def calculate_sma_ema(date_scope):
     
@@ -358,6 +358,8 @@ async def calculate_rsi():
 #oblicz raz na dzień  
 async def calculate_macd():
     for currency in constants.CONSTANTS["currency"]:
+        a = TECHNICAL_ANALYSIS_INDICATORS_HOURLY[currency]["EMA"]["Ema12"]["value"]
+        b = TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS[currency]["EMA"]["Ema26"]["value"]
         TECHNICAL_ANALYSIS_INDICATORS_DAILY[currency]["MACD"] = TECHNICAL_ANALYSIS_INDICATORS_HOURLY[currency]["EMA"]["Ema12"]["value"] - TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS[currency]["EMA"]["Ema26"]["value"]
 
 async def sort_data_by_date(data):

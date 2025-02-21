@@ -8,8 +8,8 @@ from Modules.TechnicalAnalysisCalculate import calculate_all_technical_indicator
 #Entry point
 async def main():
     await initialize_database()
-    # await calculate_all_technical_indicators()
-    await fetch_all_data()  
+    await calculate_all_technical_indicators()
+    # await fetch_all_data()  
 
 
 if __name__ == "__main__":

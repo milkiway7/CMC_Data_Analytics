@@ -1,7 +1,7 @@
 from Database.database import Database
 from Database.TableModels.CandlesHistoricalData import CandlesHistoricalData
 from Database.TableModels.TechnicalIndicatorsTables import TechnicalIndicatorsHourly,TechnicalIndicatorsFourHours,TechnicalIndicatorsDaily
-
+import logging
 db = Database()
 
 async def save_candles_to_db(candles_data):
@@ -13,7 +13,7 @@ async def save_candles_to_db(candles_data):
                 session.add_all([CandlesHistoricalData(**candle) for candle in batch])
                 await session.commit()
     except Exception as e:
-        print(f"Błąd zapisu do bazy: {e}")
+        logging.info(f"Database write error: {e}")
             
 async def save_technical_analysis_hourly(technical_analysis_hourly):
     async with db.get_session() as session:
@@ -31,7 +31,7 @@ async def save_technical_analysis_hourly(technical_analysis_hourly):
                 session.add(record)
                 await session.commit()
         except Exception as e:
-            print(f"Error: can't save technical indicators SMA/EMA to database:{e}")
+            logging.info(f"Database write error: {e}")
             await session.rollback()
 
 async def save_technical_analysis_four_hours(technical_analysis_four_hours):
@@ -50,7 +50,7 @@ async def save_technical_analysis_four_hours(technical_analysis_four_hours):
                 session.add(record)
                 await session.commit()
         except Exception as e:
-            print(f"Error: can't save technical indicators SMA/EMA to database:{e}")
+            logging.info(f"Database write error: {e}")
             await session.rollback()
 
 async def save_technical_analysis_daily(technical_analysis_daily):
@@ -72,5 +72,5 @@ async def save_technical_analysis_daily(technical_analysis_daily):
                 session.add(record)
                 await session.commit()
         except Exception as e:
-            print(f"Error: can't save technical indicators SMA/EMA to database:{e}")
+            logging.info(f"Database write error: {e}")
             await session.rollback()

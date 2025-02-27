@@ -9,6 +9,8 @@ import numpy as np
 
 TECHNICAL_ANALYSIS_SHORT_TERM = {
     "BTC":{
+        "MCAD": None,
+        "RSI": None,
         "SMA":{
                 "Sma5" : {
                     "close_time": None,
@@ -39,6 +41,8 @@ TECHNICAL_ANALYSIS_SHORT_TERM = {
             },
         },
     "ETH":{
+        "MCAD": None,
+        "RSI": None,
         "SMA":{
                 "Sma5" : {
                     "close_time": None,
@@ -69,6 +73,8 @@ TECHNICAL_ANALYSIS_SHORT_TERM = {
             },
         },
     "SOL":{
+        "MCAD": None,
+        "RSI": None,
         "SMA":{
                 "Sma5" : {
                     "close_time": None,
@@ -99,6 +105,8 @@ TECHNICAL_ANALYSIS_SHORT_TERM = {
             },
         },
     "XRP":{
+        "MCAD": None,
+        "RSI": None,
         "SMA":{
                 "Sma5" : {
                     "close_time": None,
@@ -131,6 +139,8 @@ TECHNICAL_ANALYSIS_SHORT_TERM = {
 }
 TECHNICAL_ANALYSIS_MEDIUM_TERM = {
     "BTC":{
+        "MCAD": None,
+        "RSI": None,
         "SMA":{
             "Sma20" : {
                     "close_time": None,
@@ -161,6 +171,8 @@ TECHNICAL_ANALYSIS_MEDIUM_TERM = {
             },
         },
     "ETH":{
+        "MCAD": None,
+        "RSI": None,
         "SMA":{
             "Sma20" : {
                     "close_time": None,
@@ -191,6 +203,8 @@ TECHNICAL_ANALYSIS_MEDIUM_TERM = {
             },
         },
     "SOL":{
+        "MCAD": None,
+        "RSI": None,
         "SMA":{
             "Sma20" : {
                     "close_time": None,
@@ -221,6 +235,8 @@ TECHNICAL_ANALYSIS_MEDIUM_TERM = {
             },
         },
     "XRP":{
+        "MCAD": None,
+        "RSI": None,
         "SMA":{
             "Sma20" : {
                     "close_time": None,
@@ -253,6 +269,8 @@ TECHNICAL_ANALYSIS_MEDIUM_TERM = {
 }
 TECHNICAL_ANALYSIS_LONG_TERM = {
     "BTC":{
+        "MCAD": None,
+        "RSI": None,
         "SMA":{
             "Sma50" : {
                     "close_time": None,
@@ -283,6 +301,8 @@ TECHNICAL_ANALYSIS_LONG_TERM = {
             }
         },
     "ETH":{
+        "MCAD": None,
+        "RSI": None,
         "SMA":{
             "Sma50" : {
                     "close_time": None,
@@ -313,6 +333,8 @@ TECHNICAL_ANALYSIS_LONG_TERM = {
             }
         },
     "SOL":{
+        "MCAD": None,
+        "RSI": None,
         "SMA":{
             "Sma50" : {
                     "close_time": None,
@@ -343,6 +365,8 @@ TECHNICAL_ANALYSIS_LONG_TERM = {
             }
         },
     "XRP":{
+        "MCAD": None,
+        "RSI": None,
         "SMA":{
             "Sma50" : {
                     "close_time": None,
@@ -375,14 +399,12 @@ TECHNICAL_ANALYSIS_LONG_TERM = {
 }
 
 async def calculate_all_technical_indicators():
-    tasks = [calculate_sma_ema("technical_indicators_short_term"),calculate_sma_ema("technical_indicators_medium_term"),calculate_sma_ema("technical_indicators_long_term")]
+    tasks = [calculate_sma_ema("technical_indicators_short_term"),calculate_sma_ema("technical_indicators_medium_term"),calculate_sma_ema("technical_indicators_long_term"),calculate_rsi()]
     result = await asyncio.gather(*tasks)
-    if all(result):
-        await calculate_macd()
     #save to db
-    # await save_technical_analysis_hourly(TECHNICAL_ANALYSIS_INDICATORS_HOURLY)   
-    # await save_technical_analysis_four_hours(TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS)   
-    # await save_technical_analysis_daily(TECHNICAL_ANALYSIS_INDICATORS_DAILY)
+    await save_technical_analysis_hourly(TECHNICAL_ANALYSIS_SHORT_TERM)   
+    await save_technical_analysis_four_hours(TECHNICAL_ANALYSIS_MEDIUM_TERM)   
+    await save_technical_analysis_daily(TECHNICAL_ANALYSIS_LONG_TERM)
  
 async def calculate_sma_ema(trading_scope):
     
@@ -414,43 +436,37 @@ async def calculate_sma_ema(trading_scope):
                     TECHNICAL_ANALYSIS_LONG_TERM[currency][f"{technical_indicator}"][indicator_info["name"]]["close_time"] = df["close_time"].iloc[-1]
     return True
     
-#oblicz raz na dzień
 async def calculate_rsi():
 
     for currency in constants.CONSTANTS["currency"]:
-        data = await get_filtered_candles(currency,constants.CONSTANTS["RSI"]["interval"],get_date_days_ago_ms(constants.CONSTANTS["RSI"]["period"],1))
-        sorted_data = await sort_data_by_date(data)
-        close_prices = [entry['close'] for entry in sorted_data]
-        
-        if len(close_prices) > 14:
-            close_prices = close_prices[-14:]
+        for technical_indicator in constants.CONSTANTS["RSI"]:
+            data = await get_filtered_candles(currency, constants.CONSTANTS["RSI"][technical_indicator]["interval"], get_date_ago_ms(constants.CONSTANTS["RSI"][technical_indicator]["period_ms"]),constants.CONSTANTS["RSI"][technical_indicator]["candle_count"])
+            sorted_data = await sort_data_by_date(data)
+            close_prices = [entry['close'] for entry in sorted_data]
+                
+            deltas = np.diff(close_prices)  
+            gains = np.insert(np.where(deltas > 0, deltas, 0),0,0)  
+            losses = np.insert(np.where(deltas < 0, -deltas, 0),0,0)  
             
-        deltas = np.diff(close_prices)  # Różnice między kolejnymi dniami
-        gains = np.insert(np.where(deltas > 0, deltas, 0),0,0)  # Tylko wzrosty
-        losses = np.insert(np.where(deltas < 0, -deltas, 0),0,0)  # Tylko spadki (wartości dodatnie)
-        
-        avg_gain = np.mean(gains[:len(gains)])  # Tablica na średnie wzrosty
-        avg_loss =  np.mean(losses[:len(losses)])
-        
-        rs = None
-        rsi = None
-        
-        if avg_loss == 0:
-            rsi = 100 # avg_gain / avg_losss = 0 co znaczy że nie było spadków (maksymalnie wykupiony rynek)
-        else:
-            rs = avg_gain / avg_loss
-            rsi = 100 - (100 / (1 + rs))
-            rsi = rsi.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) 
-        # TECHNICAL_ANALYSIS_INDICATORS_DAILY[currency]["RSI"] = rsi
+            avg_gain = np.mean(gains[:len(gains)])  
+            avg_loss =  np.mean(losses[:len(losses)])
+            
+            rs = None
+            rsi = None
+            
+            if avg_loss == 0:
+                rsi = 100 # avg_gain / avg_losss = 0 co znaczy że nie było spadków (maksymalnie wykupiony rynek)
+            else:
+                rs = avg_gain / avg_loss
+                rsi = 100 - (100 / (1 + rs))
+                rsi = rsi.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) 
+            if technical_indicator == "short_term":
+                TECHNICAL_ANALYSIS_SHORT_TERM[currency]["RSI"] = rsi
+            if technical_indicator == "medium_term":
+                TECHNICAL_ANALYSIS_MEDIUM_TERM[currency]["RSI"] = rsi
+            if technical_indicator == "long_term":
+                TECHNICAL_ANALYSIS_LONG_TERM[currency]["RSI"] = rsi
     return True
-
-#oblicz raz na dzień  
-async def calculate_macd():
-    pass
-    # for currency in constants.CONSTANTS["currency"]:
-    #     a = TECHNICAL_ANALYSIS_INDICATORS_HOURLY[currency]["EMA"]["Ema12"]["value"]
-    #     b = TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS[currency]["EMA"]["Ema26"]["value"]
-    #     TECHNICAL_ANALYSIS_INDICATORS_DAILY[currency]["MACD"] = TECHNICAL_ANALYSIS_INDICATORS_HOURLY[currency]["EMA"]["Ema12"]["value"] - TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS[currency]["EMA"]["Ema26"]["value"]
 
 async def sort_data_by_date(data):
     return sorted(data, key=lambda x: x["close_time"])

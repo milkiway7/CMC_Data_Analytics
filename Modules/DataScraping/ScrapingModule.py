@@ -23,13 +23,13 @@ class ScrapingModule(DataScrapingBase):
 
     async def log_in(self):
         try:
-            await self.page.fill("input[name='text']", "imagineyourerich@gmail.com")
+            await self.page.fill("input[name='text']", "EMAIL")
             await self.page.get_by_text("Dalej").click()
             user_name = self.page.locator("span:text['Wprowadź swój numer telefonu lub nazwę użytkownika']")
             if user_name.is_visible():
-                await self.page.fill("input[type='text']", "Cmc2025Cmc")
+                await self.page.fill("input[type='text']", "USER_NAME")
                 await self.page.get_by_text("Dalej").click()
-            await self.page.fill("input[name='password']", "datascraper1")
+            await self.page.fill("input[name='password']", "PASSWORD")
             await self.page.get_by_text("Zaloguj się").click()
         except Exception as e:
             logging.error(f"Log in failed to X portal: {e}")

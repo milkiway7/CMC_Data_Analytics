@@ -13,10 +13,9 @@ async def main():
 
         logging.info('Data analysis started')
         await initialize_database()
-        # await calculate_all_technical_indicators()
         # await fetch_all_data()  
-        scrapping = ScrapingModule()
-        await scrapping.scrape_protal_x("https://x.com/home")
+        await calculate_all_technical_indicators()
+
     except Exception as e:
         logging.error(f"Error: Data analysis failed {e}")
 

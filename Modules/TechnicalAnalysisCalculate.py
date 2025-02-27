@@ -1,13 +1,13 @@
 from decimal import ROUND_HALF_UP, Decimal
 import pandas as pd
 from Database.get_from_db import get_filtered_candles
-from Helpers.date import get_date_days_ago_ms
+from Helpers.date import get_date_days_ago_ms, get_date_ago_ms
 import constants
 import asyncio
 from Database.save_to_db import save_technical_analysis_hourly,save_technical_analysis_four_hours,save_technical_analysis_daily
 import numpy as np
 
-TECHNICAL_ANALYSIS_INDICATORS_HOURLY = {
+TECHNICAL_ANALYSIS_SHORT_TERM = {
     "BTC":{
         "SMA":{
                 "Sma5" : {
@@ -28,11 +28,11 @@ TECHNICAL_ANALYSIS_INDICATORS_HOURLY = {
                     "close_time": None,
                     "value": None
                 },
-                "Ema9" : {
+                "Ema10" : {
                     "close_time": None,
                     "value": None
                 },                
-                "Ema12" : {
+                "Ema20" : {
                     "close_time": None,
                     "value": None
                 }
@@ -42,7 +42,7 @@ TECHNICAL_ANALYSIS_INDICATORS_HOURLY = {
         "SMA":{
                 "Sma5" : {
                     "close_time": None,
-                    "value": None   
+                    "value": None,   
                 },
                 "Sma10" : {
                     "close_time": None,
@@ -58,11 +58,11 @@ TECHNICAL_ANALYSIS_INDICATORS_HOURLY = {
                     "close_time": None,
                     "value": None
                 },
-                "Ema9" : {
+                "Ema10" : {
                     "close_time": None,
                     "value": None
                 },                
-                "Ema12" : {
+                "Ema20" : {
                     "close_time": None,
                     "value": None
                 }
@@ -72,7 +72,7 @@ TECHNICAL_ANALYSIS_INDICATORS_HOURLY = {
         "SMA":{
                 "Sma5" : {
                     "close_time": None,
-                    "value": None   
+                    "value": None,   
                 },
                 "Sma10" : {
                     "close_time": None,
@@ -88,11 +88,11 @@ TECHNICAL_ANALYSIS_INDICATORS_HOURLY = {
                     "close_time": None,
                     "value": None
                 },
-                "Ema9" : {
+                "Ema10" : {
                     "close_time": None,
                     "value": None
                 },                
-                "Ema12" : {
+                "Ema20" : {
                     "close_time": None,
                     "value": None
                 }
@@ -102,7 +102,7 @@ TECHNICAL_ANALYSIS_INDICATORS_HOURLY = {
         "SMA":{
                 "Sma5" : {
                     "close_time": None,
-                    "value": None   
+                    "value": None,   
                 },
                 "Sma10" : {
                     "close_time": None,
@@ -118,20 +118,24 @@ TECHNICAL_ANALYSIS_INDICATORS_HOURLY = {
                     "close_time": None,
                     "value": None
                 },
-                "Ema9" : {
+                "Ema10" : {
                     "close_time": None,
                     "value": None
                 },                
-                "Ema12" : {
+                "Ema20" : {
                     "close_time": None,
                     "value": None
                 }
             },
         }
 }
-TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS = {
+TECHNICAL_ANALYSIS_MEDIUM_TERM = {
     "BTC":{
         "SMA":{
+            "Sma20" : {
+                    "close_time": None,
+                    "value": None   
+                },
                 "Sma50" : {
                     "close_time": None,
                     "value": None   
@@ -142,7 +146,11 @@ TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS = {
                 }
             },
         "EMA":{
-                "Ema26" : {
+                "Ema20" : {
+                    "close_time": None,
+                    "value": None
+                },
+                "Ema50" : {
                     "close_time": None,
                     "value": None
                 },
@@ -154,6 +162,10 @@ TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS = {
         },
     "ETH":{
         "SMA":{
+            "Sma20" : {
+                    "close_time": None,
+                    "value": None   
+                },
                 "Sma50" : {
                     "close_time": None,
                     "value": None   
@@ -164,7 +176,11 @@ TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS = {
                 }
             },
         "EMA":{
-                "Ema26" : {
+                "Ema20" : {
+                    "close_time": None,
+                    "value": None
+                },
+                "Ema50" : {
                     "close_time": None,
                     "value": None
                 },
@@ -176,6 +192,10 @@ TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS = {
         },
     "SOL":{
         "SMA":{
+            "Sma20" : {
+                    "close_time": None,
+                    "value": None   
+                },
                 "Sma50" : {
                     "close_time": None,
                     "value": None   
@@ -186,7 +206,11 @@ TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS = {
                 }
             },
         "EMA":{
-                "Ema26" : {
+                "Ema20" : {
+                    "close_time": None,
+                    "value": None
+                },
+                "Ema50" : {
                     "close_time": None,
                     "value": None
                 },
@@ -198,6 +222,10 @@ TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS = {
         },
     "XRP":{
         "SMA":{
+            "Sma20" : {
+                    "close_time": None,
+                    "value": None   
+                },
                 "Sma50" : {
                     "close_time": None,
                     "value": None   
@@ -208,7 +236,11 @@ TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS = {
                 }
             },
         "EMA":{
-                "Ema26" : {
+                "Ema20" : {
+                    "close_time": None,
+                    "value": None
+                },
+                "Ema50" : {
                     "close_time": None,
                     "value": None
                 },
@@ -219,17 +251,31 @@ TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS = {
             },
         }
 }
-TECHNICAL_ANALYSIS_INDICATORS_DAILY = {
+TECHNICAL_ANALYSIS_LONG_TERM = {
     "BTC":{
-        "RSI":None,
-        "MACD": None,
         "SMA":{
+            "Sma50" : {
+                    "close_time": None,
+                    "value": None
+                },
+                "Sma100" : {
+                    "close_time": None,
+                    "value": None
+                },
                 "Sma200" : {
                     "close_time": None,
                     "value": None
                 }
             },
         "EMA":{
+            "Ema50" : {
+                    "close_time": None,
+                    "value": None
+                },
+                "Ema100" : {
+                    "close_time": None,
+                    "value": None
+                },
                 "Ema200" : {
                     "close_time": None,
                     "value": None
@@ -237,15 +283,29 @@ TECHNICAL_ANALYSIS_INDICATORS_DAILY = {
             }
         },
     "ETH":{
-        "RSI":None,
-        "MACD": None,
         "SMA":{
+            "Sma50" : {
+                    "close_time": None,
+                    "value": None
+                },
+                "Sma100" : {
+                    "close_time": None,
+                    "value": None
+                },
                 "Sma200" : {
                     "close_time": None,
                     "value": None
                 }
             },
         "EMA":{
+            "Ema50" : {
+                    "close_time": None,
+                    "value": None
+                },
+                "Ema100" : {
+                    "close_time": None,
+                    "value": None
+                },
                 "Ema200" : {
                     "close_time": None,
                     "value": None
@@ -253,15 +313,29 @@ TECHNICAL_ANALYSIS_INDICATORS_DAILY = {
             }
         },
     "SOL":{
-        "RSI":None,
-        "MACD": None,
         "SMA":{
+            "Sma50" : {
+                    "close_time": None,
+                    "value": None
+                },
+                "Sma100" : {
+                    "close_time": None,
+                    "value": None
+                },
                 "Sma200" : {
                     "close_time": None,
                     "value": None
                 }
             },
         "EMA":{
+            "Ema50" : {
+                    "close_time": None,
+                    "value": None
+                },
+                "Ema100" : {
+                    "close_time": None,
+                    "value": None
+                },
                 "Ema200" : {
                     "close_time": None,
                     "value": None
@@ -269,15 +343,29 @@ TECHNICAL_ANALYSIS_INDICATORS_DAILY = {
             }
         },
     "XRP":{
-        "RSI":None,
-        "MACD": None,
         "SMA":{
+            "Sma50" : {
+                    "close_time": None,
+                    "value": None
+                },
+                "Sma100" : {
+                    "close_time": None,
+                    "value": None
+                },
                 "Sma200" : {
                     "close_time": None,
                     "value": None
                 }
             },
         "EMA":{
+            "Ema50" : {
+                    "close_time": None,
+                    "value": None
+                },
+                "Ema100" : {
+                    "close_time": None,
+                    "value": None
+                },
                 "Ema200" : {
                     "close_time": None,
                     "value": None
@@ -287,22 +375,23 @@ TECHNICAL_ANALYSIS_INDICATORS_DAILY = {
 }
 
 async def calculate_all_technical_indicators():
-    tasks = [calculate_sma_ema("technical_indicators_hourly"),calculate_sma_ema("technical_indicators_four_hours"),calculate_sma_ema("technical_indicators_daily"),calculate_rsi()]
+    tasks = [calculate_sma_ema("technical_indicators_short_term"),calculate_sma_ema("technical_indicators_medium_term"),calculate_sma_ema("technical_indicators_long_term")]
     result = await asyncio.gather(*tasks)
     if all(result):
         await calculate_macd()
     #save to db
-    await save_technical_analysis_hourly(TECHNICAL_ANALYSIS_INDICATORS_HOURLY)   
-    await save_technical_analysis_four_hours(TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS)   
-    await save_technical_analysis_daily(TECHNICAL_ANALYSIS_INDICATORS_DAILY)
+    # await save_technical_analysis_hourly(TECHNICAL_ANALYSIS_INDICATORS_HOURLY)   
+    # await save_technical_analysis_four_hours(TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS)   
+    # await save_technical_analysis_daily(TECHNICAL_ANALYSIS_INDICATORS_DAILY)
  
-async def calculate_sma_ema(date_scope):
+async def calculate_sma_ema(trading_scope):
     
     for currency in constants.CONSTANTS["currency"]:
-        for technical_indicator in constants.CONSTANTS[f"{date_scope}"]:
+        for technical_indicator in constants.CONSTANTS[f"{trading_scope}"]:
             
-            for indicator_info in constants.CONSTANTS[f"{date_scope}"][technical_indicator]:
-                data = await get_filtered_candles(currency, indicator_info["interval"], get_date_days_ago_ms(indicator_info["period"],1))
+            for indicator_info in constants.CONSTANTS[f"{trading_scope}"][technical_indicator]:
+                data = await get_filtered_candles(currency, indicator_info["interval"], get_date_ago_ms(indicator_info["period_ms"]),indicator_info["candle_count"])
+                # SORT OLDEST TO NEWEST
                 sorted_data = await sort_data_by_date(data)
                 count = len(sorted_data)
                 df = pd.DataFrame(sorted_data)
@@ -314,15 +403,15 @@ async def calculate_sma_ema(date_scope):
                     
                 ma_value = df[indicator_info["name"]].iloc[-1]
                 
-                if date_scope == "technical_indicators_hourly":
-                    TECHNICAL_ANALYSIS_INDICATORS_HOURLY[currency][f"{technical_indicator}"][indicator_info["name"]]["value"] = ma_value
-                    TECHNICAL_ANALYSIS_INDICATORS_HOURLY[currency][f"{technical_indicator}"][indicator_info["name"]]["close_time"] = df["close_time"].iloc[-1]
-                elif date_scope == "technical_indicators_four_hours":
-                    TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS[currency][f"{technical_indicator}"][indicator_info["name"]]["value"] = ma_value
-                    TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS[currency][f"{technical_indicator}"][indicator_info["name"]]["close_time"] = df["close_time"].iloc[-1]
-                elif date_scope == "technical_indicators_daily":
-                    TECHNICAL_ANALYSIS_INDICATORS_DAILY[currency][f"{technical_indicator}"][indicator_info["name"]]["value"] = ma_value
-                    TECHNICAL_ANALYSIS_INDICATORS_DAILY[currency][f"{technical_indicator}"][indicator_info["name"]]["close_time"] = df["close_time"].iloc[-1]
+                if trading_scope == "technical_indicators_short_term":
+                    TECHNICAL_ANALYSIS_SHORT_TERM[currency][f"{technical_indicator}"][indicator_info["name"]]["value"] = ma_value
+                    TECHNICAL_ANALYSIS_SHORT_TERM[currency][f"{technical_indicator}"][indicator_info["name"]]["close_time"] = df["close_time"].iloc[-1]
+                elif trading_scope == "technical_indicators_medium_term":
+                    TECHNICAL_ANALYSIS_MEDIUM_TERM[currency][f"{technical_indicator}"][indicator_info["name"]]["value"] = ma_value
+                    TECHNICAL_ANALYSIS_MEDIUM_TERM[currency][f"{technical_indicator}"][indicator_info["name"]]["close_time"] = df["close_time"].iloc[-1]
+                elif trading_scope == "technical_indicators_long_term":
+                    TECHNICAL_ANALYSIS_LONG_TERM[currency][f"{technical_indicator}"][indicator_info["name"]]["value"] = ma_value
+                    TECHNICAL_ANALYSIS_LONG_TERM[currency][f"{technical_indicator}"][indicator_info["name"]]["close_time"] = df["close_time"].iloc[-1]
     return True
     
 #oblicz raz na dzień
@@ -352,15 +441,16 @@ async def calculate_rsi():
             rs = avg_gain / avg_loss
             rsi = 100 - (100 / (1 + rs))
             rsi = rsi.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) 
-        TECHNICAL_ANALYSIS_INDICATORS_DAILY[currency]["RSI"] = rsi
+        # TECHNICAL_ANALYSIS_INDICATORS_DAILY[currency]["RSI"] = rsi
     return True
 
 #oblicz raz na dzień  
 async def calculate_macd():
-    for currency in constants.CONSTANTS["currency"]:
-        a = TECHNICAL_ANALYSIS_INDICATORS_HOURLY[currency]["EMA"]["Ema12"]["value"]
-        b = TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS[currency]["EMA"]["Ema26"]["value"]
-        TECHNICAL_ANALYSIS_INDICATORS_DAILY[currency]["MACD"] = TECHNICAL_ANALYSIS_INDICATORS_HOURLY[currency]["EMA"]["Ema12"]["value"] - TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS[currency]["EMA"]["Ema26"]["value"]
+    pass
+    # for currency in constants.CONSTANTS["currency"]:
+    #     a = TECHNICAL_ANALYSIS_INDICATORS_HOURLY[currency]["EMA"]["Ema12"]["value"]
+    #     b = TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS[currency]["EMA"]["Ema26"]["value"]
+    #     TECHNICAL_ANALYSIS_INDICATORS_DAILY[currency]["MACD"] = TECHNICAL_ANALYSIS_INDICATORS_HOURLY[currency]["EMA"]["Ema12"]["value"] - TECHNICAL_ANALYSIS_INDICATORS_FOUR_HOURS[currency]["EMA"]["Ema26"]["value"]
 
 async def sort_data_by_date(data):
     return sorted(data, key=lambda x: x["close_time"])

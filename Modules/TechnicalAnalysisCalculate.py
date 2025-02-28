@@ -9,7 +9,6 @@ import numpy as np
 
 TECHNICAL_ANALYSIS_SHORT_TERM = {
     "BTC":{
-        "MCAD": None,
         "RSI": None,
         "SMA":{
                 "Sma5" : {
@@ -41,7 +40,6 @@ TECHNICAL_ANALYSIS_SHORT_TERM = {
             },
         },
     "ETH":{
-        "MCAD": None,
         "RSI": None,
         "SMA":{
                 "Sma5" : {
@@ -73,7 +71,6 @@ TECHNICAL_ANALYSIS_SHORT_TERM = {
             },
         },
     "SOL":{
-        "MCAD": None,
         "RSI": None,
         "SMA":{
                 "Sma5" : {
@@ -105,7 +102,6 @@ TECHNICAL_ANALYSIS_SHORT_TERM = {
             },
         },
     "XRP":{
-        "MCAD": None,
         "RSI": None,
         "SMA":{
                 "Sma5" : {
@@ -139,7 +135,6 @@ TECHNICAL_ANALYSIS_SHORT_TERM = {
 }
 TECHNICAL_ANALYSIS_MEDIUM_TERM = {
     "BTC":{
-        "MCAD": None,
         "RSI": None,
         "SMA":{
             "Sma20" : {
@@ -171,7 +166,6 @@ TECHNICAL_ANALYSIS_MEDIUM_TERM = {
             },
         },
     "ETH":{
-        "MCAD": None,
         "RSI": None,
         "SMA":{
             "Sma20" : {
@@ -203,7 +197,6 @@ TECHNICAL_ANALYSIS_MEDIUM_TERM = {
             },
         },
     "SOL":{
-        "MCAD": None,
         "RSI": None,
         "SMA":{
             "Sma20" : {
@@ -235,7 +228,6 @@ TECHNICAL_ANALYSIS_MEDIUM_TERM = {
             },
         },
     "XRP":{
-        "MCAD": None,
         "RSI": None,
         "SMA":{
             "Sma20" : {
@@ -269,7 +261,6 @@ TECHNICAL_ANALYSIS_MEDIUM_TERM = {
 }
 TECHNICAL_ANALYSIS_LONG_TERM = {
     "BTC":{
-        "MCAD": None,
         "RSI": None,
         "SMA":{
             "Sma50" : {
@@ -301,7 +292,6 @@ TECHNICAL_ANALYSIS_LONG_TERM = {
             }
         },
     "ETH":{
-        "MCAD": None,
         "RSI": None,
         "SMA":{
             "Sma50" : {
@@ -333,7 +323,6 @@ TECHNICAL_ANALYSIS_LONG_TERM = {
             }
         },
     "SOL":{
-        "MCAD": None,
         "RSI": None,
         "SMA":{
             "Sma50" : {
@@ -365,7 +354,6 @@ TECHNICAL_ANALYSIS_LONG_TERM = {
             }
         },
     "XRP":{
-        "MCAD": None,
         "RSI": None,
         "SMA":{
             "Sma50" : {

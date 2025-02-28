@@ -2,7 +2,6 @@ from Database.database import Database
 from Database.TableModels.CandlesHistoricalData import CandlesHistoricalData
 from sqlalchemy import select
 from datetime import datetime, timezone
-import asyncio
 
 db = Database()
 
@@ -34,7 +33,6 @@ async def get_filtered_candles(symbol: str, interval: str, endtime, num_items):
                 older_candles = older_result.scalars().all()
                 candles.extend(older_candles)
 
-            # Konwersja na słowniki
             candles_dict = [
                 {
                     "symbol": candle.Symbol,

@@ -1,5 +1,5 @@
 from Database.database import Database
-from Database.TableModels.CandlesHistoricalData import CandlesHistoricalData
+from Database.TableModels.CandlesHistoricalData import Candles
 from Database.TableModels.TechnicalIndicatorsTables import TechnicalIndicators
 import logging
 
@@ -11,7 +11,7 @@ async def save_candles_to_db(candles_data):
         async with db.get_session() as session:
             for i in range(0, len(candles_data), batch_size):
                 batch = candles_data[i:i + batch_size]
-                session.add_all([CandlesHistoricalData(**candle) for candle in batch])
+                session.add_all([Candles(**candle) for candle in batch])
                 await session.commit()
     except Exception as e:
         logging.info(f"Database write error: {e}")

@@ -1,5 +1,5 @@
 from Database.database import Database
-from Database.TableModels.CandlesHistoricalData import CandlesHistoricalData
+from Database.TableModels.CandlesHistoricalData import Candles
 from sqlalchemy import select
 from datetime import datetime, timezone
 
@@ -11,11 +11,11 @@ async def get_filtered_candles(symbol: str, interval: str, endtime, num_items):
             now = int(datetime.now(timezone.utc).timestamp() * 1000)  # Konwersja do milisekund
 
             # Pobranie świec w zakresie [endtime, now]
-            query = select(CandlesHistoricalData).filter(
-                CandlesHistoricalData.Symbol == symbol,
-                CandlesHistoricalData.Interval == interval,
-                CandlesHistoricalData.CloseTime.between(endtime, now)
-            ).order_by(CandlesHistoricalData.CloseTime.desc()).limit(num_items)
+            query = select(Candles).filter(
+                Candles.Symbol == symbol,
+                Candles.Interval == interval,
+                Candles.CloseTime.between(endtime, now)
+            ).order_by(Candles.CloseTime.desc()).limit(num_items)
 
             result = await session.execute(query)
             candles = result.scalars().all()
@@ -23,11 +23,11 @@ async def get_filtered_candles(symbol: str, interval: str, endtime, num_items):
             # Jeśli za mało rekordów, pobierz starsze
             if len(candles) < num_items:
                 remaining = num_items - len(candles)
-                older_query = select(CandlesHistoricalData).filter(
-                    CandlesHistoricalData.Symbol == symbol,
-                    CandlesHistoricalData.Interval == interval,
-                    CandlesHistoricalData.CloseTime < endtime
-                ).order_by(CandlesHistoricalData.CloseTime.desc()).limit(remaining)
+                older_query = select(Candles).filter(
+                    Candles.Symbol == symbol,
+                    Candles.Interval == interval,
+                    Candles.CloseTime < endtime
+                ).order_by(Candles.CloseTime.desc()).limit(remaining)
 
                 older_result = await session.execute(older_query)
                 older_candles = older_result.scalars().all()

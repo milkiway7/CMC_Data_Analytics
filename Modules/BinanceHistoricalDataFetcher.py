@@ -9,7 +9,7 @@ SYMBOLS = ["BTCUSDT","ETHUSDT","XRPUSDT","SOLUSDT"]
 INTERVALS = ["1m", "5m", "15m", "1h","4h","1d"]
 LIMIT = 1000
 
-HISTORICAL_DATA_END_DATE = get_date_days_ago_ms(365,3)
+HISTORICAL_DATA_END_DATE = get_date_days_ago_ms(365,1)
 
 async def fetch_historical_candles(symbol, interval):
     end_time = int(time.time() * 1000)  # Aktualny czas w milisekundach

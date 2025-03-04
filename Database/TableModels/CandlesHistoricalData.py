@@ -3,9 +3,9 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
-class CandlesHistoricalData(Base):
+class Candles(Base):
     
-    __tablename__ = "CandlesHistoricalData"
+    __tablename__ = "Candles"
 
     Id = Column(Integer, primary_key=True, autoincrement=True)
     Symbol = Column(String(10), nullable=False)

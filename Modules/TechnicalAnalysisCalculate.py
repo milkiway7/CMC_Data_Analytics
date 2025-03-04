@@ -10,11 +10,10 @@ import numpy as np
 TECHNICAL_INDICATORS = []
 
 async def calculate_all_technical_indicators():
-    tasks = [calculate_sma_ema("technical_indicators_short_term"),calculate_sma_ema("technical_indicators_medium_term"),calculate_sma_ema("technical_indicators_long_term"),calculate_rsi()]
-    result = await asyncio.gather(*tasks)
+    tasks = [calculate_rsi("one_minute")]
+    await asyncio.gather(*tasks)
     #save to db
-    if result:
-        await save_technical_indicators(TECHNICAL_INDICATORS)
+    await save_technical_indicators(TECHNICAL_INDICATORS)
  
 async def calculate_sma_ema(trading_scope):
     
@@ -44,43 +43,42 @@ async def calculate_sma_ema(trading_scope):
                 })
     return True
     
-async def calculate_rsi():
+async def calculate_rsi(technical_indicator):
 
     for currency in constants.CONSTANTS["currency"]:
-        for technical_indicator in constants.CONSTANTS["RSI"]:
-            data = await get_filtered_candles(currency, constants.CONSTANTS["RSI"][technical_indicator]["interval"], get_date_ago_ms(constants.CONSTANTS["RSI"][technical_indicator]["period_ms"]),constants.CONSTANTS["RSI"][technical_indicator]["candle_count"])
-            sorted_data = await sort_data_by_date(data)
-            close_prices = [entry['close'] for entry in sorted_data]
-                
-            deltas = np.diff(close_prices)  
-            gains = np.insert(np.where(deltas > 0, deltas, 0),0,0)  
-            losses = np.insert(np.where(deltas < 0, -deltas, 0),0,0)  
-            
-            avg_gain = np.mean(gains[:len(gains)])  
-            avg_loss =  np.mean(losses[:len(losses)])
-            
-            rs = None
-            rsi = None
-            
-            if avg_loss == 0:
-                rsi = 100 # avg_gain / avg_losss = 0 co znaczy że nie było spadków (maksymalnie wykupiony rynek)
-            else:
-                rs = avg_gain / avg_loss
-                rsi = 100 - (100 / (1 + rs))
-                rsi = rsi.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) 
 
-            TECHNICAL_INDICATORS.append({
-                "symbol": currency,
-                "interval": constants.CONSTANTS["RSI"][technical_indicator]["interval"],
-                "close_time": sorted_data[-1]["close_time"],
-                "indicator": "RSI",
-                "value": rsi
-            })
+        data = await get_filtered_candles(currency, constants.CONSTANTS["RSI"][technical_indicator]["interval"], get_date_ago_ms(constants.CONSTANTS["RSI"][technical_indicator]["period_ms"]),constants.CONSTANTS["RSI"][technical_indicator]["candle_count"])
+        sorted_data = await sort_data_by_date(data)
+        close_prices = [entry['close'] for entry in sorted_data]
+                
+        deltas = np.diff(close_prices)  
+        gains = np.insert(np.where(deltas > 0, deltas, 0),0,0)  
+        losses = np.insert(np.where(deltas < 0, -deltas, 0),0,0)  
+            
+        avg_gain = np.mean(gains[:len(gains)])  
+        avg_loss =  np.mean(losses[:len(losses)])
+            
+        rs = None
+        rsi = None
+            
+        if avg_loss == 0:
+            rsi = 100 # avg_gain / avg_losss = 0 co znaczy że nie było spadków (maksymalnie wykupiony rynek)
+        else:
+            rs = avg_gain / avg_loss
+            rsi = 100 - (100 / (1 + rs))
+            rsi = rsi.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) 
+
+        TECHNICAL_INDICATORS.append({
+            "symbol": currency,
+            "interval": constants.CONSTANTS["RSI"][technical_indicator]["interval"],
+            "close_time": sorted_data[-1]["close_time"],
+            "indicator": "RSI",
+            "value": rsi
+        })
     return True
 
 async def sort_data_by_date(data):
     return sorted(data, key=lambda x: x["close_time"])
-
 
 
 

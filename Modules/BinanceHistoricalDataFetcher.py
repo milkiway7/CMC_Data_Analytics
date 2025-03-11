@@ -9,7 +9,7 @@ SYMBOLS = ["BTCUSDT","ETHUSDT","XRPUSDT","SOLUSDT"]
 INTERVALS = ["1m", "5m", "15m", "1h","4h","1d"]
 LIMIT = 1000
 
-HISTORICAL_DATA_END_DATE = get_date_days_ago_ms(365,3)
+HISTORICAL_DATA_END_DATE = get_date_days_ago_ms(365,1)
 
 async def fetch_historical_candles(symbol, interval):
     end_time = int(time.time() * 1000)  # Aktualny czas w milisekundach
@@ -60,6 +60,10 @@ async def fetch_historical_candles(symbol, interval):
                     break
 
 async def fetch_all_data():
-    tasks = [fetch_historical_candles(symbol, interval) for symbol in SYMBOLS for interval in INTERVALS]
-    await asyncio.gather(*tasks)
-    
+    try:
+        tasks = [fetch_historical_candles(symbol, interval) for symbol in SYMBOLS for interval in INTERVALS]
+        await asyncio.gather(*tasks)
+        return True  
+    except Exception as e:
+        print(f"Error while fetching data: {e}")
+        return False  

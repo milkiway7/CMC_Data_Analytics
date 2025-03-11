@@ -65,6 +65,7 @@ async def calculate_sma_ema(trading_scope):
                 })
 
     await save_technical_indicators(TECHNICAL_INDICATORS)
+
     
 async def calculate_rsi(technical_indicator):
 

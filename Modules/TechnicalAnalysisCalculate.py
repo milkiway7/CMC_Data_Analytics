@@ -6,14 +6,36 @@ import constants
 import asyncio
 from Database.save_to_db import save_technical_indicators
 import numpy as np
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+import logging
 
 TECHNICAL_INDICATORS = []
 
-async def calculate_all_technical_indicators():
-    tasks = [calculate_rsi("one_minute")]
-    await asyncio.gather(*tasks)
-    #save to db
-    await save_technical_indicators(TECHNICAL_INDICATORS)
+def start_scheduler():
+    scheduler = AsyncIOScheduler()
+
+    scheduler.add_job(lambda: asyncio.create_task(calculate_sma_ema("technical_indicators_one_minute")), 
+                      'interval', minutes=1, misfire_grace_time=10)
+    scheduler.add_job(lambda: asyncio.create_task(calculate_rsi("one_minute")), 
+                      'interval', minutes=1, misfire_grace_time=10)
+    scheduler.add_job(lambda: asyncio.create_task(calculate_sma_ema("technical_indicators_five_minutes")), 
+                      'interval', minutes=5, misfire_grace_time=20)
+    scheduler.add_job(lambda: asyncio.create_task(calculate_sma_ema("technical_indicators_fifteen_minutes")), 
+                      'interval', minutes=15, misfire_grace_time=30)
+    scheduler.add_job(lambda: asyncio.create_task(calculate_sma_ema("technical_indicators_one_hour")), 
+                      'interval', hours=1, misfire_grace_time=60)
+    scheduler.add_job(lambda: asyncio.create_task(calculate_rsi("one_hour")), 
+                      'interval', hours=1, misfire_grace_time=60)
+    scheduler.add_job(lambda: asyncio.create_task(calculate_sma_ema("technical_indicators_four_hours")), 
+                      'interval', hours=4, misfire_grace_time=120)
+    scheduler.add_job(lambda: asyncio.create_task(calculate_sma_ema("technical_indicators_one_day")), 
+                      'interval', days=1, misfire_grace_time=300)
+    scheduler.add_job(lambda: asyncio.create_task(calculate_rsi("one_day")), 
+                      'interval', days=1, misfire_grace_time=300)
+
+    scheduler.start()
+    logging.info("Scheduler started")
+
  
 async def calculate_sma_ema(trading_scope):
     
@@ -41,7 +63,8 @@ async def calculate_sma_ema(trading_scope):
                     "indicator": indicator_info["name"],
                     "value": Decimal(ma_value).quantize(Decimal('0.00000001'), rounding=ROUND_HALF_UP)
                 })
-    return True
+
+    await save_technical_indicators(TECHNICAL_INDICATORS)
     
 async def calculate_rsi(technical_indicator):
 
@@ -75,7 +98,8 @@ async def calculate_rsi(technical_indicator):
             "indicator": "RSI",
             "value": rsi
         })
-    return True
+
+    await save_technical_indicators(TECHNICAL_INDICATORS)
 
 async def sort_data_by_date(data):
     return sorted(data, key=lambda x: x["close_time"])

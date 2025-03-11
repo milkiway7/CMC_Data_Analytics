@@ -60,6 +60,10 @@ async def fetch_historical_candles(symbol, interval):
                     break
 
 async def fetch_all_data():
-    tasks = [fetch_historical_candles(symbol, interval) for symbol in SYMBOLS for interval in INTERVALS]
-    await asyncio.gather(*tasks)
-    
+    try:
+        tasks = [fetch_historical_candles(symbol, interval) for symbol in SYMBOLS for interval in INTERVALS]
+        await asyncio.gather(*tasks)
+        return True  
+    except Exception as e:
+        print(f"Error while fetching data: {e}")
+        return False  

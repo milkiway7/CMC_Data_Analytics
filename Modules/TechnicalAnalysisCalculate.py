@@ -21,9 +21,6 @@ async def calculate_sma_ema(trading_scope):
                 count = len(sorted_data)
                 df = pd.DataFrame(sorted_data)
 
-                if(indicator_info["interval"] == "5m"):
-                    a = 1
-
                 if technical_indicator == "SMA":
                     df[indicator_info["name"]] = df["close"].rolling(window=count).mean()
                 else:

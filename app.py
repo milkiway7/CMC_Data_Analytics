@@ -14,8 +14,13 @@ async def main():
         logging.info('Data analysis started')
         await initialize_database()
         # fetch_result = await fetch_all_data()  
-        start_scheduler()
+        asyncio.create_task(start_scheduler())
 
+        a = 1
+        while True:
+            a += 1
+            print(a)
+            await asyncio.sleep(5)
         # Tworzymy Future, który nigdy się nie kończy
         await asyncio.Future() 
         # if fetch_result:  # Jeśli fetch_all_data zwróci True, uruchamiamy scheduler

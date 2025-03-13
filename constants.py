@@ -23,7 +23,7 @@ CONSTANTS = {
     },
     "technical_indicators_one_minute":{
         "SMA:":[
-                        {
+            {
             "name": "Sma5",
             "candle_count": 5,
             "period_ms": 5 * 60000,

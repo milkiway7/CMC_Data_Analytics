@@ -3,39 +3,11 @@ import pandas as pd
 from Database.get_from_db import get_filtered_candles
 from Helpers.date import get_date_ago_ms
 import constants
-import asyncio
 from Database.save_to_db import save_technical_indicators
 import numpy as np
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-import logging
 
-TECHNICAL_INDICATORS = []
-
-def start_scheduler():
-    scheduler = AsyncIOScheduler()
-
-    scheduler.add_job(lambda: asyncio.create_task(calculate_sma_ema("technical_indicators_one_minute")), 
-                      'interval', minutes=1, misfire_grace_time=10)
-    scheduler.add_job(lambda: asyncio.create_task(calculate_rsi("one_minute")), 
-                      'interval', minutes=1, misfire_grace_time=10)
-    scheduler.add_job(lambda: asyncio.create_task(calculate_sma_ema("technical_indicators_five_minutes")), 
-                      'interval', minutes=5, misfire_grace_time=20)
-    scheduler.add_job(lambda: asyncio.create_task(calculate_sma_ema("technical_indicators_fifteen_minutes")), 
-                      'interval', minutes=15, misfire_grace_time=30)
-    scheduler.add_job(lambda: asyncio.create_task(calculate_sma_ema("technical_indicators_one_hour")), 
-                      'interval', hours=1, misfire_grace_time=60)
-    scheduler.add_job(lambda: asyncio.create_task(calculate_rsi("one_hour")), 
-                      'interval', hours=1, misfire_grace_time=60)
-    scheduler.add_job(lambda: asyncio.create_task(calculate_sma_ema("technical_indicators_four_hours")), 
-                      'interval', hours=4, misfire_grace_time=120)
-    scheduler.add_job(lambda: asyncio.create_task(calculate_sma_ema("technical_indicators_one_day")), 
-                      'interval', days=1, misfire_grace_time=300)
-    scheduler.add_job(lambda: asyncio.create_task(calculate_rsi("one_day")), 
-                      'interval', days=1, misfire_grace_time=300)
-
-    scheduler.start()
-    logging.info("Scheduler started")
-
+TECHNICAL_INDICATORS_SMA_EMA = []
+TECHNICAL_INDICATORS_RSI = []
  
 async def calculate_sma_ema(trading_scope):
     
@@ -48,7 +20,7 @@ async def calculate_sma_ema(trading_scope):
                 sorted_data = await sort_data_by_date(data)
                 count = len(sorted_data)
                 df = pd.DataFrame(sorted_data)
-                
+
                 if technical_indicator == "SMA":
                     df[indicator_info["name"]] = df["close"].rolling(window=count).mean()
                 else:
@@ -56,7 +28,7 @@ async def calculate_sma_ema(trading_scope):
                     
                 ma_value = df[indicator_info["name"]].iloc[-1]
 
-                TECHNICAL_INDICATORS.append({
+                TECHNICAL_INDICATORS_SMA_EMA.append({
                     "symbol": currency,
                     "interval": indicator_info["interval"],
                     "close_time": int(df["close_time"].iloc[-1]),
@@ -64,8 +36,9 @@ async def calculate_sma_ema(trading_scope):
                     "value": Decimal(ma_value).quantize(Decimal('0.00000001'), rounding=ROUND_HALF_UP)
                 })
 
-    await save_technical_indicators(TECHNICAL_INDICATORS)
-    
+    await save_technical_indicators(TECHNICAL_INDICATORS_SMA_EMA)
+    TECHNICAL_INDICATORS_SMA_EMA.clear()
+
 async def calculate_rsi(technical_indicator):
 
     for currency in constants.CONSTANTS["currency"]:
@@ -91,7 +64,7 @@ async def calculate_rsi(technical_indicator):
             rsi = 100 - (100 / (1 + rs))
             rsi = rsi.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) 
 
-        TECHNICAL_INDICATORS.append({
+        TECHNICAL_INDICATORS_RSI.append({
             "symbol": currency,
             "interval": constants.CONSTANTS["RSI"][technical_indicator]["interval"],
             "close_time": sorted_data[-1]["close_time"],
@@ -99,7 +72,8 @@ async def calculate_rsi(technical_indicator):
             "value": rsi
         })
 
-    await save_technical_indicators(TECHNICAL_INDICATORS)
+    await save_technical_indicators(TECHNICAL_INDICATORS_RSI)
+    TECHNICAL_INDICATORS_RSI.clear()
 
 async def sort_data_by_date(data):
     return sorted(data, key=lambda x: x["close_time"])

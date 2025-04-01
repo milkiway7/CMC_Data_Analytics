@@ -62,10 +62,11 @@ async def fetch_historical_candles(symbol, interval):
                     for candle in data
                 ]
                 
-                if lastest_candle is not None:
-                    if lastest_candle.CloseTime > candles[0]["CloseTime"]:
-                        print(f"Pobrano brakujące świece dla {symbol} {interval}")
-                        break
+                if lastest_candle is not None and any(candle["CloseTime"] < lastest_candle.CloseTime for candle in candles):
+                    filtered_candles = [candle for candle in candles if candle["CloseTime"] > lastest_candle.CloseTime]
+                    await save_candles_to_db(filtered_candles)
+                    print(f"Pobrano brakujące świece dla {symbol} {interval}")
+                    break
 
                 # Zapisanie świec do bazy danych w partiach po 1000
                 await save_candles_to_db(candles)

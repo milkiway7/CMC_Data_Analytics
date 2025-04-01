@@ -53,3 +53,16 @@ async def get_filtered_candles(symbol: str, interval: str, endtime, num_items):
         except Exception as e:
             print(f"Error - get filtered candles from db: {e}")
             return None
+        
+async def get_lastes_candle(symbol,interval):
+    async with db.get_session() as session:
+        stmt = (
+            select(Candles)
+            .where(Candles.Symbol == symbol, Candles.Interval == interval)
+            .order_by(Candles.CloseTime.desc())
+            .limit(1)
+        )
+        result = await session.execute(stmt)
+        last_candle = result.scalars().first()
+
+        return last_candle

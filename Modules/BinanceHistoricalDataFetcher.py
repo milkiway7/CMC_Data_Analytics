@@ -1,7 +1,8 @@
 import aiohttp
 import asyncio
 import time
-from Database.save_to_db import save_candles_to_db, get_lastes_candle
+from Database.save_to_db import save_candles_to_db
+from Database.get_from_db import get_lastes_candle
 from Helpers.date import get_date_days_ago_ms
 
 CANDLES_API_URL = "https://api.binance.com/api/v3/klines"

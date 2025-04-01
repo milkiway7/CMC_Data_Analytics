@@ -47,19 +47,6 @@ async def save_assets_info(data):
             logging.info(f"Database write error: {e}")
             await session.rollback()
 
-async def get_lastes_candle(symbol,interval):
-    async with db.get_session() as session:
-        stmt = (
-            select(Candles)
-            .where(Candles.Symbol == symbol, Candles.Interval == interval)
-            .order_by(Candles.CloseTime.desc())
-            .limit(1)
-        )
-        result = await session.execute(stmt)
-        last_candle = result.scalars().first()
-
-        return last_candle
-
 async def save_crypto_panic(data):
     try:
         batch_size = 20

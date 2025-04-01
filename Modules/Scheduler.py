@@ -28,7 +28,6 @@ async def scheduler_one_day():
     await asyncio.gather(*tasks)
 
 async def start_scheduler():
-    logging.info("Data fetched successfully, starting scheduler...")
     scheduler = AsyncIOScheduler()
     scheduler.add_job(scheduler_one_minutes, 'interval', minutes=1,misfire_grace_time=10)
     scheduler.add_job(scheduler_five_munutes,'interval', minutes=5,misfire_grace_time=20)

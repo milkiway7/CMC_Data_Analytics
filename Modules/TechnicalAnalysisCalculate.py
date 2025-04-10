@@ -6,8 +6,6 @@ import constants
 from Database.save_to_db import save_technical_indicators
 import numpy as np
 
-TECHNICAL_INDICATORS_SMA_EMA = []
-TECHNICAL_INDICATORS_RSI = []
  
 async def calculate_sma_ema(trading_scope):
     
@@ -28,16 +26,18 @@ async def calculate_sma_ema(trading_scope):
                     
                 ma_value = df[indicator_info["name"]].iloc[-1]
 
-                TECHNICAL_INDICATORS_SMA_EMA.append({
+                calculated_indicator={
                     "symbol": currency,
                     "interval": indicator_info["interval"],
                     "close_time": int(df["close_time"].iloc[-1]),
                     "indicator": indicator_info["name"],
                     "value": Decimal(ma_value).quantize(Decimal('0.00000001'), rounding=ROUND_HALF_UP)
-                })
+                }
 
-    await save_technical_indicators(TECHNICAL_INDICATORS_SMA_EMA)
-    TECHNICAL_INDICATORS_SMA_EMA.clear()
+                await save_technical_indicators(calculated_indicator)
+
+
+
 
 async def calculate_rsi(technical_indicator):
 
@@ -64,16 +64,15 @@ async def calculate_rsi(technical_indicator):
             rsi = 100 - (100 / (1 + rs))
             rsi = rsi.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) 
 
-        TECHNICAL_INDICATORS_RSI.append({
+        calculated_indicator={
             "symbol": currency,
             "interval": constants.CONSTANTS["RSI"][technical_indicator]["interval"],
             "close_time": sorted_data[-1]["close_time"],
             "indicator": "RSI",
             "value": rsi
-        })
+        }
 
-    await save_technical_indicators(TECHNICAL_INDICATORS_RSI)
-    TECHNICAL_INDICATORS_RSI.clear()
+        await save_technical_indicators(calculated_indicator)
 
 async def sort_data_by_date(data):
     return sorted(data, key=lambda x: x["close_time"])

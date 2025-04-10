@@ -24,14 +24,15 @@ async def main():
 
         if fetch_result:  # Jeśli fetch_all_data zwróci True, uruchamiamy scheduler
             logging.info("Data fetched successfully, starting scheduler...")
-            # tasks = [calculate_sma_ema("technical_indicators_one_minute"), calculate_rsi("one_minute"),
-            #          calculate_sma_ema("technical_indicators_five_minutes"),
-            #          calculate_sma_ema("technical_indicators_fifteen_minutes"),
-            #          calculate_sma_ema("technical_indicators_one_hour"),calculate_rsi("one_hour"),
-            #           calculate_sma_ema("technical_indicators_four_hours"),
-            #           calculate_sma_ema("technical_indicators_one_day"),calculate_rsi("one_day")]
-            # await asyncio.gather(*tasks)
-            asyncio.create_task(start_scheduler())
+            tasks = [calculate_sma_ema("technical_indicators_one_minute"), calculate_rsi("one_minute"),
+                     calculate_sma_ema("technical_indicators_five_minutes"),
+                     calculate_sma_ema("technical_indicators_fifteen_minutes"),
+                     calculate_sma_ema("technical_indicators_one_hour"),calculate_rsi("one_hour"),
+                      calculate_sma_ema("technical_indicators_four_hours"),
+                      calculate_sma_ema("technical_indicators_one_day"),calculate_rsi("one_day")]
+            await asyncio.gather(*tasks)
+    
+            # asyncio.create_task(start_scheduler())
         else:
             logging.error("Data fetching failed, scheduler will not start.")
         

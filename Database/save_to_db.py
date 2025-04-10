@@ -89,15 +89,14 @@ async def save_candles_to_db(candles_data):
 async def save_technical_indicators(technical_analysis_data):
     async with db.get_session() as session:
         try:
-            for data in technical_analysis_data:
-                record = TechnicalIndicators(
-                    Symbol=data["symbol"],
-                    CloseTime=data["close_time"],
-                    Indicator=data["indicator"],
-                    Interval=data["interval"],
-                    Value=data["value"]
+            record = TechnicalIndicators(
+                Symbol=technical_analysis_data["symbol"],
+                CloseTime=technical_analysis_data["close_time"],
+                Indicator=technical_analysis_data["indicator"],
+                Interval=technical_analysis_data["interval"],
+                Value=technical_analysis_data["value"]
                 )
-                session.add(record)
+            session.add(record)
             await session.commit()
         except Exception as e:
             logging.info(f"Database write error: {e}")
